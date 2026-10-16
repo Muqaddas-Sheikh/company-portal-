@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexora — Company Portal</title>
+<meta name="description" content="Nexora company portal — secure sign in, dashboard, projects, team and messaging.">
+<style>
+:root{
+  --blue:#2563eb; --blue-dark:#1d4ed8; --blue-darker:#1e40af;
+  --blue-light:#dbeafe; --blue-pale:#eff6ff;
+  --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+  --bg:#f4f7fe; --card:#ffffff;
+  --green:#16a34a; --green-bg:#dcfce7;
+  --amber:#d97706; --amber-bg:#fef3c7;
+  --red:#dc2626; --red-bg:#fee2e2;
+  --radius:16px;
+  --shadow:0 10px 30px rgba(37,99,235,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+.hidden{display:none!important}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit}
+
+/* ============ AUTH ============ */
+#auth-view{min-height:100vh;display:flex}
+.auth-left{flex:1;background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 55%,#3b82f6 100%);color:#fff;padding:56px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+.auth-left::after{content:"";position:absolute;width:520px;height:520px;border-radius:50%;background:rgba(255,255,255,.08);top:-160px;right:-160px}
+.auth-left::before{content:"";position:absolute;width:340px;height:340px;border-radius:50%;background:rgba(255,255,255,.06);bottom:-120px;left:-100px}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:48px;position:relative;z-index:1}
+.brand-mark{width:46px;height:46px;border-radius:14px;background:#fff;color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px}
+.brand-name{font-size:24px;font-weight:800;letter-spacing:.3px}
+.auth-left h1{font-size:40px;line-height:1.2;margin-bottom:16px;position:relative;z-index:1}
+.auth-left p.lead{opacity:.85;font-size:17px;max-width:440px;margin-bottom:40px;position:relative;z-index:1}
+.feat-list{list-style:none;position:relative;z-index:1;display:grid;gap:18px}
+.feat-list li{display:flex;gap:14px;align-items:flex-start}
+.feat-ic{width:40px;height:40px;flex:none;border-radius:12px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:18px}
+.feat-list b{display:block;margin-bottom:3px}
+.feat-list span{opacity:.75;font-size:14px}
+.auth-right{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 24px}
+.auth-card{width:100%;max-width:430px;background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:40px 36px}
+.auth-card h2{font-size:26px;margin-bottom:6px}
+.auth-card .sub{color:var(--muted);font-size:14px;margin-bottom:26px}
+.tabs{display:flex;background:var(--blue-pale);border-radius:12px;padding:4px;margin-bottom:26px}
+.tabs button{flex:1;border:none;background:transparent;padding:10px;border-radius:9px;font-weight:600;color:var(--muted);font-size:14px;transition:.2s}
+.tabs button.active{background:#fff;color:var(--blue);box-shadow:0 2px 8px rgba(37,99,235,.15)}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#334155}
+.field input{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:15px;outline:none;transition:.2s;background:#fff}
+.field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light)}
+.field .err{color:var(--red);font-size:12px;margin-top:5px;display:none}
+.pw-wrap{position:relative}
+.pw-wrap button{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;background:none;color:var(--muted);font-size:13px;font-weight:600}
+.btn-primary{width:100%;border:none;background:var(--blue);color:#fff;padding:13px;border-radius:10px;font-size:15px;font-weight:700;transition:.2s;margin-top:6px}
+.btn-primary:hover{background:var(--blue-dark)}
+.auth-alt{text-align:center;margin-top:18px;font-size:13px;color:var(--muted)}
+.auth-alt a{color:var(--blue);font-weight:600;cursor:pointer;text-decoration:none}
+.demo-hint{margin-top:20px;background:var(--blue-pale);border:1px dashed var(--blue);border-radius:10px;padding:12px;font-size:13px;color:var(--blue-darker);text-align:center}
+
+/* ============ APP SHELL ============ */
+#app-view{display:flex;min-height:100vh}
+.sidebar{width:260px;flex:none;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;z-index:50}
+.sb-brand{display:flex;align-items:center;gap:10px;padding:22px 20px;border-bottom:1px solid var(--line)}
+.sb-brand .brand-mark{width:38px;height:38px;font-size:18px;background:var(--blue);color:#fff}
+.sb-brand .brand-name{font-size:19px;color:var(--ink)}
+.nav{flex:1;padding:16px 12px;overflow-y:auto}
+.nav button{display:flex;align-items:center;gap:12px;width:100%;border:none;background:none;padding:12px 14px;border-radius:10px;font-size:14.5px;font-weight:500;color:#475569;margin-bottom:4px;transition:.15s;text-align:left}
+.nav button .ic{font-size:18px;width:24px;text-align:center}
+.nav button:hover{background:var(--blue-pale);color:var(--blue)}
+.nav button.active{background:var(--blue);color:#fff;box-shadow:0 6px 16px rgba(37,99,235,.3)}
+.sb-user{padding:16px;border-top:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex:none}
+.sb-user b{font-size:14px;display:block}
+.sb-user span{font-size:12px;color:var(--muted)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{background:#fff;border-bottom:1px solid var(--line);padding:14px 28px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:40}
+.hamburger{display:none;border:none;background:none;font-size:22px;color:var(--ink)}
+.topbar h1{font-size:20px}
+.search{flex:1;max-width:420px;margin-left:auto;position:relative}
+.search input{width:100%;padding:10px 14px 10px 40px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;outline:none;background:var(--bg)}
+.search input:focus{border-color:var(--blue)}
+.search .sic{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.icon-btn{width:42px;height:42px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font-size:18px;position:relative;transition:.15s}
+.icon-btn:hover{border-color:var(--blue);color:var(--blue)}
+.dot{position:absolute;top:9px;right:10px;width:9px;height:9px;border-radius:50%;background:var(--red);border:2px solid #fff}
+.dropdown{position:absolute;top:60px;right:28px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 40px rgba(15,23,42,.14);width:300px;z-index:100;overflow:hidden}
+.dropdown h4{padding:14px 16px 8px;font-size:14px}
+.notif-item{padding:12px 16px;border-top:1px solid var(--line);font-size:13.5px;display:flex;gap:10px;align-items:flex-start}
+.notif-item small{color:var(--muted);display:block;margin-top:2px}
+.menu-item{width:100%;border:none;background:none;text-align:left;padding:12px 16px;font-size:14px;border-top:1px solid var(--line)}
+.menu-item:hover{background:var(--blue-pale);color:var(--blue)}
+.menu-item.danger{color:var(--red)}
+.page{padding:28px;max-width:1200px;width:100%;margin:0 auto}
+.welcome{background:linear-gradient(120deg,#1d4ed8,#3b82f6);color:#fff;border-radius:var(--radius);padding:30px 32px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;gap:20px;box-shadow:var(--shadow)}
+.welcome h2{font-size:24px;margin-bottom:8px}
+.welcome p{opacity:.85;font-size:14px}
+.btn-white{border:none;background:#fff;color:var(--blue);padding:11px 22px;border-radius:10px;font-weight:700;font-size:14px;flex:none}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:24px}
+.stat{background:var(--card);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.stat .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.stat .sic2{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.stat b{font-size:28px;display:block}
+.stat span{color:var(--muted);font-size:13px}
+.trend{font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px}
+.trend.up{background:var(--green-bg);color:var(--green)}
+.trend.down{background:var(--red-bg);color:var(--red)}
+.grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}
+.card{background:var(--card);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.card h3{font-size:17px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
+.card h3 a{font-size:13px;color:var(--blue);font-weight:600;cursor:pointer;text-decoration:none}
+.proj-row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}
+.proj-row:last-child{border:none}
+.proj-ic{width:44px;height:44px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;font-weight:700}
+.proj-row b{font-size:14px;display:block}
+.proj-row small{color:var(--muted);font-size:12px}
+.bar{height:7px;background:var(--line);border-radius:10px;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),#60a5fa);border-radius:10px}
+.proj-pct{margin-left:auto;font-size:13px;font-weight:700;color:var(--blue)}
+.timeline{list-style:none}
+.timeline li{position:relative;padding:0 0 20px 28px;font-size:13.5px}
+.timeline li::before{content:"";position:absolute;left:7px;top:6px;width:9px;height:9px;border-radius:50%;background:var(--blue)}
+.timeline li::after{content:"";position:absolute;left:11px;top:20px;bottom:0;width:2px;background:var(--line)}
+.timeline li:last-child::after{display:none}
+.timeline small{color:var(--muted);display:block;margin-top:2px}
+.pill{font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px}
+.pill.green{background:var(--green-bg);color:var(--green)}
+.pill.amber{background:var(--amber-bg);color:var(--amber)}
+.pill.blue{background:var(--blue-light);color:var(--blue-dark)}
+.pill.red{background:var(--red-bg);color:var(--red)}
+
+/* Projects page */
+.proj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.proj-card{background:var(--card);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);border:1px solid var(--line);transition:.2s}
+.proj-card:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(37,99,235,.14)}
+.proj-card .head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.proj-card p{font-size:13.5px;color:var(--muted);margin:10px 0 16px;line-height:1.55}
+.team-avatars{display:flex;margin-top:14px}
+.team-avatars .avatar{width:32px;height:32px;font-size:12px;border:2px solid #fff;margin-left:-8px}
+.team-avatars .avatar:first-child{margin-left:0}
+
+/* Team page */
+.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.member{background:var(--card);border-radius:var(--radius);padding:26px 20px;text-align:center;box-shadow:var(--shadow);border:1px solid var(--line)}
+.member .avatar{width:64px;height:64px;font-size:24px;margin:0 auto 12px;position:relative}
+.status{position:absolute;bottom:2px;right:2px;width:14px;height:14px;border-radius:50%;border:2.5px solid #fff;background:var(--green)}
+.status.away{background:var(--amber)}
+.member b{display:block;font-size:15px}
+.member span{font-size:13px;color:var(--muted)}
+.member .role{display:inline-block;margin-top:10px}
+
+/* Messages */
+.msg-wrap{display:grid;grid-template-columns:300px 1fr;gap:0;background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line);min-height:560px}
+.msg-list{border-right:1px solid var(--line);overflow-y:auto}
+.msg-item{display:flex;gap:12px;padding:16px;border-bottom:1px solid var(--line);cursor:pointer;align-items:center}
+.msg-item:hover,.msg-item.active{background:var(--blue-pale)}
+.msg-item b{font-size:14px;display:block}
+.msg-item small{color:var(--muted);font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.msg-body{display:flex;flex-direction:column}
+.msg-head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.msg-head b{font-size:15px}
+.chat{flex:1;padding:22px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;background:var(--bg)}
+.bubble{max-width:70%;padding:11px 16px;border-radius:16px;font-size:14px;line-height:1.5}
+.bubble.in{background:#fff;border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
+.bubble.out{background:var(--blue);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.bubble small{display:block;font-size:11px;opacity:.7;margin-top:4px}
+.msg-input{display:flex;gap:10px;padding:16px;border-top:1px solid var(--line);background:#fff}
+.msg-input input{flex:1;padding:12px 16px;border:1.5px solid var(--line);border-radius:12px;font-size:14px;outline:none}
+.msg-input input:focus{border-color:var(--blue)}
+.btn-send{border:none;background:var(--blue);color:#fff;padding:0 24px;border-radius:12px;font-weight:700}
+.btn-send:hover{background:var(--blue-dark)}
+
+/* Settings */
+.set-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.switch-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);font-size:14px}
+.switch-row:last-child{border:none}
+.switch{position:relative;width:48px;height:26px;flex:none}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:#cbd5e1;border-radius:30px;transition:.2s;cursor:pointer}
+.slider::before{content:"";position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s;box-shadow:0 2px 5px rgba(0,0,0,.2)}
+.switch input:checked+.slider{background:var(--blue)}
+.switch input:checked+.slider::before{transform:translateX(22px)}
+.btn-row{display:flex;gap:10px;margin-top:18px}
+.btn-outline{border:1.5px solid var(--line);background:#fff;padding:11px 22px;border-radius:10px;font-weight:600;font-size:14px}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue)}
+
+/* Toast */
+#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:13px 26px;border-radius:12px;font-size:14px;font-weight:500;z-index:999;transition:.3s;opacity:0;box-shadow:0 12px 30px rgba(0,0,0,.25);max-width:90vw;text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* Responsive */
+@media(max-width:1024px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .grid2,.set-grid{grid-template-columns:1fr}
+  .proj-grid{grid-template-columns:repeat(2,1fr)}
+  .team-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:860px){
+  .auth-left{display:none}
+  .sidebar{position:fixed;left:0;top:0;transform:translateX(-100%);transition:.25s;box-shadow:0 0 60px rgba(0,0,0,.2)}
+  .sidebar.open{transform:none}
+  .hamburger{display:block}
+  .search{display:none}
+  .proj-grid{grid-template-columns:1fr}
+  .msg-wrap{grid-template-columns:1fr}
+  .msg-list{display:none}
+  .page{padding:18px}
+  .welcome{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<!-- ================= AUTH ================= -->
+<div id="auth-view">
+  <div class="auth-left">
+    <div class="brand"><div class="brand-mark">N</div><div class="brand-name">Nexora</div></div>
+    <h1>One portal for your<br>entire company.</h1>
+    <p class="lead">Projects, teams, messages and insights — everything your people need, in one secure blue-and-white workspace.</p>
+    <ul class="feat-list">
+      <li><div class="feat-ic">📊</div><div><b>Live dashboards</b><span>Track projects, tasks and revenue in real time.</span></div></li>
+      <li><div class="feat-ic">👥</div><div><b>Team collaboration</b><span>Chat, share files and manage your team in one place.</span></div></li>
+      <li><div class="feat-ic">🔒</div><div><b>Secure sign-in</b><span>Your account is protected with encrypted access.</span></div></li>
+    </ul>
+  </div>
+  <div class="auth-right">
+    <div class="auth-card">
+      <div class="tabs">
+        <button id="tab-signin" class="active" onclick="showTab('signin')">Sign In</button>
+        <button id="tab-signup" onclick="showTab('signup')">Create Account</button>
+      </div>
+
+      <!-- SIGN IN -->
+      <div id="form-signin">
+        <h2>Welcome back 👋</h2>
+        <p class="sub">Sign in to access your company portal.</p>
+        <div class="field"><label>Email address</label><input type="email" id="li-email" placeholder="you@company.com"><div class="err" id="li-email-err">Please enter a valid email.</div></div>
+        <div class="field"><label>Password</label><div class="pw-wrap"><input type="password" id="li-pass" placeholder="••••••••"><button type="button" onclick="togglePw('li-pass',this)">Show</button></div><div class="err" id="li-pass-err">Password is required.</div></div>
+        <button class="btn-primary" onclick="doLogin()">Sign In →</button>
+        <div class="auth-alt">New here? <a onclick="showTab('signup')">Create an account</a></div>
+        <div class="demo-hint">Demo login — Email: <b>demo@nexora.com</b> · Password: <b>demo123</b></div>
+      </div>
+
+      <!-- SIGN UP -->
+      <div id="form-signup" class="hidden">
+        <h2>Create account ✨</h2>
+        <p class="sub">Join your company's portal in seconds.</p>
+        <div class="field"><label>Full name</label><input type="text" id="su-name" placeholder="Ali Raza"><div class="err" id="su-name-err">Please enter your name.</div></div>
+        <div class="field"><label>Email address</label><input type="email" id="su-email" placeholder="you@company.com"><div class="err" id="su-email-err">Please enter a valid email.</div></div>
+        <div class="field"><label>Password</label><div class="pw-wrap"><input type="password" id="su-pass" placeholder="Min. 6 characters"><button type="button" onclick="togglePw('su-pass',this)">Show</button></div><div class="err" id="su-pass-err">Password must be at least 6 characters.</div></div>
+        <div class="field"><label>Department</label><input type="text" id="su-dept" placeholder="e.g. Marketing, Engineering"></div>
+        <button class="btn-primary" onclick="doSignup()">Create Account →</button>
+        <div class="auth-alt">Already have an account? <a onclick="showTab('signin')">Sign in</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app-view" class="hidden">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand"><div class="brand-mark">N</div><div class="brand-name">Nexora</div></div>
+    <nav class="nav">
+      <button class="active" data-nav="dashboard" onclick="go('dashboard')"><span class="ic">📊</span>Dashboard</button>
+      <button data-nav="projects" onclick="go('projects')"><span class="ic">📁</span>Projects</button>
+      <button data-nav="team" onclick="go('team')"><span class="ic">👥</span>Team</button>
+      <button data-nav="messages" onclick="go('messages')"><span class="ic">💬</span>Messages</button>
+      <button data-nav="settings" onclick="go('settings')"><span class="ic">⚙️</span>Settings</button>
+    </nav>
+    <div class="sb-user"><div class="avatar" id="sb-avatar">U</div><div><b id="sb-name">User</b><span id="sb-email">user@company.com</span></div></div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <h1 id="page-title">Dashboard</h1>
+      <div class="search"><span class="sic">🔍</span><input placeholder="Search projects, people, files…" onkeydown="if(event.key==='Enter')toast('🔍 Search is a demo in this preview')"></div>
+      <button class="icon-btn" onclick="toggleDrop('notif-drop')">🔔<span class="dot"></span></button>
+      <button class="icon-btn" onclick="toggleDrop('user-drop')"><span id="tb-avatar">👤</span></button>
+    </header>
+    <div class="dropdown hidden" id="notif-drop">
+      <h4>Notifications</h4>
+      <div class="notif-item">🎉<div><b>Project milestone reached</b><small>Website Redesign is 80% complete · 2h ago</small></div></div>
+      <div class="notif-item">👥<div><b>Sara joined the team</b><small>New designer in Marketing · 5h ago</small></div></div>
+      <div class="notif-item">📅<div><b>Meeting tomorrow</b><small>Quarterly review at 10:00 AM · 1d ago</small></div></div>
+    </div>
+    <div class="dropdown hidden" id="user-drop">
+      <button class="menu-item" onclick="go('settings');hideDrops()">⚙️ Account settings</button>
+      <button class="menu-item danger" onclick="doLogout()">🚪 Sign out</button>
+    </div>
+
+    <main class="page">
+      <!-- DASHBOARD -->
+      <section data-page="dashboard">
+        <div class="welcome">
+          <div><h2 id="welcome-name">Welcome back! 👋</h2><p>Here's what's happening across your company today.</p></div>
+          <button class="btn-white" onclick="go('projects')">View Projects</button>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="top"><div class="sic2" style="background:var(--blue-light)">📁</div><span class="trend up">+12%</span></div><b>24</b><span>Active Projects</span></div>
+          <div class="stat"><div class="top"><div class="sic2" style="background:var(--amber-bg)">✅</div><span class="trend up">+8%</span></div><b>156</b><span>Tasks Completed</span></div>
+          <div class="stat"><div class="top"><div class="sic2" style="background:var(--green-bg)">👥</div><span class="trend up">+4</span></div><b>48</b><span>Team Members</span></div>
+          <div class="stat"><div class="top"><div class="sic2" style="background:#ede9fe">💰</div><span class="trend down">-2%</span></div><b>$86k</b><span>Monthly Revenue</span></div>
+        </div>
+        <div class="grid2">
+          <div class="card"><h3>Project Progress <a onclick="go('projects')">View all →</a></h3>
+            <div class="proj-row"><div class="proj-ic" style="background:#7c3aed">W</div><div style="flex:1"><b>Website Redesign</b><small>Due Mar 15 · 6 members</small><div class="bar"><i style="width:80%"></i></div></div><span class="proj-pct">80%</span></div>
+            <div class="proj-row"><div class="proj-ic" style="background:#0ea5e9">M</div><div style="flex:1"><b>Mobile App Launch</b><small>Due Apr 02 · 8 members</small><div class="bar"><i style="width:55%"></i></div></div><span class="proj-pct">55%</span></div>
+            <div class="proj-row"><div class="proj-ic" style="background:#10b981">C</div><div style="flex:1"><b>CRM Integration</b><small>Due Feb 28 · 4 members</small><div class="bar"><i style="width:92%"></i></div></div><span class="proj-pct">92%</span></div>
+            <div class="proj-row"><div class="proj-ic" style="background:#f59e0b">B</div><div style="flex:1"><b>Brand Refresh</b><small>Due May 10 · 5 members</small><div class="bar"><i style="width:30%"></i></div></div><span class="proj-pct">30%</span></div>
+          </div>
+          <div class="card"><h3>Recent Activity</h3>
+            <ul class="timeline">
+              <li><b>Ahmed uploaded 3 files</b><small>Website Redesign · 20 min ago</small></li>
+              <li><b>Sara completed "Homepage mockup"</b><small>Brand Refresh · 1h ago</small></li>
+              <li><b>New comment on Mobile App Launch</b><small>by Bilal · 3h ago</small></li>
+              <li><b>Quarterly report published</b><small>by Management · yesterday</small></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROJECTS -->
+      <section data-page="projects" class="hidden">
+        <div class="proj-grid">
+          <div class="proj-card"><div class="head"><div class="proj-ic" style="background:#7c3aed">W</div><span class="pill green">On Track</span></div><b>Website Redesign</b><p>Complete overhaul of the corporate website with a modern blue-and-white identity.</p><div class="bar"><i style="width:80%"></i></div><div style="display:flex;justify-content:space-between;margin-top:8px;font-size:13px;color:var(--muted)"><span>80% complete</span><span>Due Mar 15</span></div><div class="team-avatars"><div class="avatar" style="background:#7c3aed">A</div><div class="avatar" style="background:#0ea5e9">S</div><div class="avatar" style="background:#10b981">B</div><div class="avatar" style="background:#64748b">+3</div></div></div>
+          <div class="proj-card"><div class="head"><div class="proj-ic" style="background:#0ea5e9">M</div><span class="pill amber">At Risk</span></div><b>Mobile App Launch</b><p>iOS and Android launch for the customer app, including beta testing phase.</p><div class="bar"><i style="width:55%"></i></div><div style="display:flex;justify-content:space-between;margin-top:8px;font-size:13px;color:var(--muted)"><span>55% complete</span><span>Due Apr 02</span></div><div class="team-avatars"><div class="avatar" style="background:#0ea5e9">M</div><div class="avatar" style="background:#f59e0b">R</div><div class="avatar" style="background:#64748b">+6</div></div></div>
+          <div class="proj-card"><div class="head"><div class="proj-ic" style="background:#10b981">C</div><span class="pill green">On Track</span></div><b>CRM Integration</b><p>Connecting sales pipeline with the new CRM — data migration in progress.</p><div class="bar"><i style="width:92%"></i></div><div style="display:flex;justify-content:space-between;margin-top:8px;font-size:13px;color:var(--muted)"><span>92% complete</span><span>Due Feb 28</span></div><div class="team-avatars"><div class="avatar" style="background:#10b981">K</div><div class="avatar" style="background:#7c3aed">T</div><div class="avatar" style="background:#64748b">+2</div></div></div>
+          <div class="proj-card"><div class="head"><div class="proj-ic" style="background:#f59e0b">B</div><span class="pill blue">Planning</span></div><b>Brand Refresh</b><p>New logo, colors and brand guidelines rolling out across departments.</p><div class="bar"><i style="width:30%"></i></div><div style="display:flex;justify-content:space-between;margin-top:8px;font-size:13px;color:var(--muted)"><span>30% complete</span><span>Due May 10</span></div><div class="team-avatars"><div class="avatar" style="background:#f59e0b">S</div><div class="avatar" style="background:#ec4899">L</div><div class="avatar" style="background:#64748b">+3</div></div></div>
+          <div class="proj-card"><div class="head"><div class="proj-ic" style="background:#ec4899">H</div><span class="pill green">On Track</span></div><b>HR Onboarding Flow</b><p>Digital onboarding checklist and document flow for new hires.</p><div class="bar"><i style="width:68%"></i></div><div style="display:flex;justify-content:space-between;margin-top:8px;font-size:13px;color:var(--muted)"><span>68% complete</span><span>Due Mar 30</span></div><div class="team-avatars"><div class="avatar" style="background:#ec4899">H</div><div class="avatar" style="background:#0ea5e9">N</div><div class="avatar" style="background:#64748b">+1</div></div></div>
+          <div class="proj-card"><div class="head"><div class="proj-ic" style="background:#6366f1">D</div><span class="pill red">Delayed</span></div><b>Data Migration</b><p>Moving legacy records to the new cloud database infrastructure.</p><div class="bar"><i style="width:42%"></i></div><div style="display:flex;justify-content:space-between;margin-top:8px;font-size:13px;color:var(--muted)"><span>42% complete</span><span>Due Feb 20</span></div><div class="team-avatars"><div class="avatar" style="background:#6366f1">D</div><div class="avatar" style="background:#64748b">+4</div></div></div>
+        </div>
+      </section>
+
+      <!-- TEAM -->
+      <section data-page="team" class="hidden">
+        <div class="team-grid">
+          <div class="member"><div class="avatar" style="background:#7c3aed">A<span class="status"></span></div><b>Ahmed Khan</b><span>Project Manager</span><br><span class="pill blue role">Management</span></div>
+          <div class="member"><div class="avatar" style="background:#0ea5e9">S<span class="status"></span></div><b>Sara Malik</b><span>UI Designer</span><br><span class="pill blue role">Design</span></div>
+          <div class="member"><div class="avatar" style="background:#10b981">B<span class="status away"></span></div><b>Bilal Ahmed</b><span>Developer</span><br><span class="pill blue role">Engineering</span></div>
+          <div class="member"><div class="avatar" style="background:#f59e0b">M<span class="status"></span></div><b>Maria Siddiqui</b><span>Marketing Lead</span><br><span class="pill blue role">Marketing</span></div>
+          <div class="member"><div class="avatar" style="background:#ec4899">R<span class="status"></span></div><b>Raza Ali</b><span>QA Engineer</span><br><span class="pill blue role">Engineering</span></div>
+          <div class="member"><div class="avatar" style="background:#6366f1">K<span class="status away"></span></div><b>Kiran Shah</b><span>HR Manager</span><br><span class="pill blue role">People</span></div>
+          <div class="member"><div class="avatar" style="background:#14b8a6">T<span class="status"></span></div><b>Tariq Mehmood</b><span>Sales Head</span><br><span class="pill blue role">Sales</span></div>
+          <div class="member"><div class="avatar" style="background:#f97316">L<span class="status"></span></div><b>Lina Farooq</b><span>Content Writer</span><br><span class="pill blue role">Marketing</span></div>
+        </div>
+      </section>
+
+      <!-- MESSAGES -->
+      <section data-page="messages" class="hidden">
+        <div class="msg-wrap">
+          <div class="msg-list">
+            <div class="msg-item active" onclick="selectChat(this,'Ahmed Khan')"><div class="avatar" style="background:#7c3aed">A</div><div><b>Ahmed Khan</b><small>Can you review the homepage draft?</small></div></div>
+            <div class="msg-item" onclick="selectChat(this,'Sara Malik')"><div class="avatar" style="background:#0ea5e9">S</div><div><b>Sara Malik</b><small>New mockups are ready 🎨</small></div></div>
+            <div class="msg-item" onclick="selectChat(this,'Team Updates')"><div class="avatar" style="background:#10b981">T</div><div><b>Team Updates</b><small>Meeting moved to 3 PM</small></div></div>
+            <div class="msg-item" onclick="selectChat(this,'Bilal Ahmed')"><div class="avatar" style="background:#f59e0b">B</div><div><b>Bilal Ahmed</b><small>API integration is done ✅</small></div></div>
+          </div>
+          <div class="msg-body">
+            <div class="msg-head"><div class="avatar" style="background:#7c3aed" id="chat-avatar">A</div><b id="chat-name">Ahmed Khan</b></div>
+            <div class="chat" id="chat-box">
+              <div class="bubble in">Hi! Can you review the homepage draft when you get a chance?<small>10:24 AM</small></div>
+              <div class="bubble out">Sure, I'll look at it this afternoon.<small>10:31 AM</small></div>
+              <div class="bubble in">Great — the client wants feedback by Friday.<small>10:32 AM</small></div>
+            </div>
+            <div class="msg-input"><input id="chat-text" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendMsg()"><button class="btn-send" onclick="sendMsg()">Send</button></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section data-page="settings" class="hidden">
+        <div class="set-grid">
+          <div class="card"><h3>Profile</h3>
+            <div class="field"><label>Full name</label><input id="set-name" value=""></div>
+            <div class="field"><label>Email</label><input id="set-email" value="" disabled style="background:var(--bg)"></div>
+            <div class="field"><label>Department</label><input id="set-dept" value=""></div>
+            <div class="btn-row"><button class="btn-primary" style="width:auto;padding:11px 28px" onclick="saveProfile()">Save Changes</button></div>
+          </div>
+          <div class="card"><h3>Preferences</h3>
+            <div class="switch-row"><span>📧 Email notifications</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+            <div class="switch-row"><span>🔔 Push notifications</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+            <div class="switch-row"><span>📊 Weekly summary report</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+            <div class="switch-row"><span>🌙 Dark mode (coming soon)</span><label class="switch"><input type="checkbox" disabled><span class="slider"></span></label></div>
+            <div class="btn-row"><button class="btn-outline" onclick="toast('✅ Preferences saved')">Save Preferences</button></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:18px"><h3>🔒 Change Password</h3>
+          <div class="set-grid">
+            <div class="field"><label>New password</label><input type="password" id="set-pass" placeholder="Min. 6 characters"></div>
+            <div class="field"><label>Confirm password</label><input type="password" id="set-pass2" placeholder="Repeat new password"></div>
+          </div>
+          <div class="btn-row"><button class="btn-primary" style="width:auto;padding:11px 28px" onclick="changePw()">Update Password</button></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+/* ============ helpers ============ */
+const $=id=>document.getElementById(id);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2600)}
+const getUsers=()=>JSON.parse(localStorage.getItem('nexora_users')||'[]');
+const saveUsers=u=>localStorage.setItem('nexora_users',JSON.stringify(u));
+const validEmail=e=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+// seed demo account
+if(!getUsers().some(u=>u.email==='demo@nexora.com')){
+  const u=getUsers();u.push({name:'Demo User',email:'demo@nexora.com',pass:'demo123',dept:'Management'});saveUsers(u);
+}
+
+/* ============ auth tabs ============ */
+function showTab(w){
+  $('tab-signin').classList.toggle('active',w==='signin');
+  $('tab-signup').classList.toggle('active',w==='signup');
+  $('form-signin').classList.toggle('hidden',w!=='signin');
+  $('form-signup').classList.toggle('hidden',w!=='signup');
+}
+function togglePw(id,btn){const i=$(id);i.type=i.type==='password'?'text':'password';btn.textContent=i.type==='password'?'Show':'Hide'}
+function err(id,show){$(id).style.display=show?'block':'none'}
+
+/* ============ sign up ============ */
+function doSignup(){
+  const name=$('su-name').value.trim(),email=$('su-email').value.trim().toLowerCase(),
+        pass=$('su-pass').value,dept=$('su-dept').value.trim();
+  err('su-name-err',!name);err('su-email-err',!validEmail(email));err('su-pass-err',pass.length<6);
+  if(!name||!validEmail(email)||pass.length<6)return;
+  const users=getUsers();
+  if(users.some(u=>u.email===email)){err('su-email-err',true);$('su-email-err').textContent='This email is already registered.';return}
+  users.push({name,email,pass,dept:dept||'General'});saveUsers(users);
+  startSession({name,email,dept:dept||'General'});
+  toast('🎉 Account created — welcome, '+name.split(' ')[0]+'!');
+}
+
+/* ============ sign in ============ */
+function doLogin(){
+  const email=$('li-email').value.trim().toLowerCase(),pass=$('li-pass').value;
+  err('li-email-err',!validEmail(email));err('li-pass-err',!pass);
+  if(!validEmail(email)||!pass)return;
+  const u=getUsers().find(u=>u.email===email);
+  if(!u){err('li-email-err',true);$('li-email-err').textContent='No account found with this email.';return}
+  if(u.pass!==pass){err('li-pass-err',true);$('li-pass-err').textContent='Incorrect password.';return}
+  startSession(u);
+  toast('👋 Welcome back, '+u.name.split(' ')[0]+'!');
+}
+
+/* ============ session ============ */
+function startSession(u){
+  localStorage.setItem('nexora_session',JSON.stringify({name:u.name,email:u.email,dept:u.dept||'General'}));
+  enterApp();
+}
+function doLogout(){localStorage.removeItem('nexora_session');$('app-view').classList.add('hidden');$('auth-view').classList.remove('hidden');toast('👋 Signed out')}
+function enterApp(){
+  const s=JSON.parse(localStorage.getItem('nexora_session')||'null');
+  if(!s)return;
+  $('auth-view').classList.add('hidden');$('app-view').classList.remove('hidden');
+  const first=s.name.trim()[0].toUpperCase();
+  $('sb-avatar').textContent=first;$('sb-name').textContent=s.name;$('sb-email').textContent=s.email;
+  $('welcome-name').textContent='Welcome back, '+s.name.split(' ')[0]+'! 👋';
+  $('set-name').value=s.name;$('set-email').value=s.email;$('set-dept').value=s.dept||'';
+  go('dashboard');
+}
+
+/* ============ navigation ============ */
+const titles={dashboard:'Dashboard',projects:'Projects',team:'Team',messages:'Messages',settings:'Settings'};
+function go(page){
+  document.querySelectorAll('[data-page]').forEach(s=>s.classList.toggle('hidden',s.dataset.page!==page));
+  document.querySelectorAll('[data-nav]').forEach(b=>b.classList.toggle('active',b.dataset.nav===page));
+  $('page-title').textContent=titles[page];
+  $('sidebar').classList.remove('open');hideDrops();
+  window.scrollTo({top:0});
+}
+function toggleDrop(id){const d=$(id);const was=d.classList.contains('hidden');hideDrops();if(was)d.classList.remove('hidden')}
+function hideDrops(){document.querySelectorAll('.dropdown').forEach(d=>d.classList.add('hidden'))}
+document.addEventListener('click',e=>{if(!e.target.closest('.dropdown')&&!e.target.closest('.icon-btn'))hideDrops()});
+
+/* ============ messages demo ============ */
+function selectChat(el,name){
+  document.querySelectorAll('.msg-item').forEach(m=>m.classList.remove('active'));el.classList.add('active');
+  $('chat-name').textContent=name;$('chat-avatar').textContent=name[0];
+  $('chat-box').innerHTML='<div class="bubble in">Hi '+name.split(' ')[0]+'! This is a demo conversation.<small>just now</small></div>';
+}
+function sendMsg(){
+  const v=$('chat-text').value.trim();if(!v)return;
+  const b=document.createElement('div');b.className='bubble out';b.innerHTML=v.replace(/</g,'&lt;')+'<small>just now</small>';
+  $('chat-box').appendChild(b);$('chat-text').value='';$('chat-box').scrollTop=1e6;
+}
+
+/* ============ settings ============ */
+function saveProfile(){
+  const s=JSON.parse(localStorage.getItem('nexora_session'));if(!s)return;
+  s.name=$('set-name').value.trim()||s.name;s.dept=$('set-dept').value.trim()||s.dept;
+  localStorage.setItem('nexora_session',JSON.stringify(s));
+  const users=getUsers();const u=users.find(u=>u.email===s.email);if(u){u.name=s.name;u.dept=s.dept;saveUsers(users)}
+  $('sb-name').textContent=s.name;$('sb-avatar').textContent=s.name[0].toUpperCase();
+  $('welcome-name').textContent='Welcome back, '+s.name.split(' ')[0]+'! 👋';
+  toast('✅ Profile updated');
+}
+function changePw(){
+  const p1=$('set-pass').value,p2=$('set-pass2').value;
+  if(p1.length<6){toast('⚠️ Password must be at least 6 characters');return}
+  if(p1!==p2){toast('⚠️ Passwords do not match');return}
+  const s=JSON.parse(localStorage.getItem('nexora_session'));
+  const users=getUsers();const u=users.find(u=>u.email===s.email);if(u){u.pass=p1;saveUsers(users)}
+  $('set-pass').value='';$('set-pass2').value='';toast('🔒 Password updated');
+}
+
+/* auto-login if session exists */
+enterApp();
+</script>
+</body>
+</html>
